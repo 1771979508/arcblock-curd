@@ -1,48 +1,89 @@
-import { useState } from 'react';
-import reactLogo from '../assets/react.svg';
-import blockletLogo from '../assets/blocklet.svg';
-import viteLogo from '../assets/vite.svg';
+import { useEffect, useState } from 'react';
+import { Form, InputGroup, Button } from 'react-bootstrap';
 import './home.css';
 import api from '../libs/api';
 
 function Home() {
-  const [count, setCount] = useState(0);
+  const [user, setUser] = useState({
+    name: '',
+    email: '',
+    phone: '',
+  });
 
   async function getApiData() {
-    const { data } = await api.get('/api/data');
-    const { message } = data;
-    alert(`Message from api: ${message}`);
+    const { data } = await api.get('/api/getUser?id=1');
+    const resUser = data.data[0];
+    const { name, email, phone } = resUser;
+    setUser({
+      ...user,
+      name,
+      email,
+      phone,
+    });
   }
 
+  const handleSubmit = async () => {
+    const { data } = await api.post('/api/editUser', {
+      id: 1,
+      ...user,
+    });
+    if (data.code === 0) {
+      alert('更新成功！');
+      getApiData();
+    }
+  };
+
+  useEffect(() => {
+    getApiData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank" rel="noreferrer">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank" rel="noreferrer">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-        <a href="https://www.arcblock.io/docs/blocklet-developer/getting-started" target="_blank" rel="noreferrer">
-          <img src={blockletLogo} className="logo blocklet" alt="Blocklet logo" />
-        </a>
+    <div className="demonstration-callout-container">
+      <h2>Person Profile</h2>
+
+      <div className="form-wrapper">
+        <Form.Label className="label" htmlFor="basic-url">
+          用户名🧐
+        </Form.Label>
+        <InputGroup className="mb-3 flex-width">
+          <Form.Control
+            id="basic-url"
+            aria-describedby="basic-addon3"
+            value={user.name}
+            onChange={(e) => setUser({ ...user, name: e.target.value })}
+          />
+        </InputGroup>
+
+        <Form.Label className="label" htmlFor="basic-url">
+          邮箱📮
+        </Form.Label>
+        <InputGroup className="mb-3 flex-width">
+          <Form.Control
+            id="basic-url"
+            aria-describedby="basic-addon3"
+            value={user.email}
+            onChange={(e) => setUser({ ...user, email: e.target.value })}
+          />
+        </InputGroup>
+
+        <Form.Label className="label" htmlFor="basic-url">
+          手机号📱
+        </Form.Label>
+        <InputGroup className="mb-3 flex-width">
+          <Form.Control
+            id="basic-url"
+            aria-describedby="basic-addon3"
+            value={user.phone}
+            onChange={(e) => setUser({ ...user, phone: e.target.value })}
+          />
+        </InputGroup>
+
+        <Button onClick={handleSubmit} variant="primary" type="submit">
+          Edit
+        </Button>
       </div>
-      <h1>Vite + React + Blocklet</h1>
-      <div className="card">
-        <button type="button" onClick={() => setCount((currentCount) => currentCount + 1)}>
-          count is {count}
-        </button>
-        <br />
-        <br />
-        <button type="button" onClick={getApiData}>
-          Get API Data
-        </button>
-        <p>
-          Edit <code>src/app.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">Click on the Vite and React logos to learn more</p>
-    </>
+    </div>
   );
 }
 
